@@ -1,3 +1,5 @@
+import { env } from '*/config/environtment'
+
 export const HttpStatusCode = {
   OK: 200,
   BAD_REQUEST: 400,
@@ -13,3 +15,8 @@ export const WHITELIST_DOMAINS = [
 
 export const EMAIL_RULE = /^\S+@\S+\.\S+$/
 export const PASSWORD_RULE = /^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d\W]{8,256}$/
+
+let websiteDomain = 'http://localhost:3000'
+if (env.BUILD_MODE === 'production') websiteDomain = 'https://trungquandev.com'
+// if (env.BUILD_MODE === 'dev') websiteDomain = 'http://localhost:3000'
+export const WEBSITE_DOMAIN = websiteDomain

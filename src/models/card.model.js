@@ -14,6 +14,8 @@ const cardCollectionSchema = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
+const ALLOW_UPDATE_FIELDS = ['columnId', 'title', 'cover', 'description', 'memberIds', 'comments', 'updatedAt', '_destroy']
+
 const validateSchema = async (data) => {
   return await cardCollectionSchema.validateAsync(data, { abortEarly: false })
 }
@@ -47,6 +49,11 @@ const update = async (id, data) => {
     const updateData = { ...data }
     if (data.boardId) updateData.boardId = ObjectId(data.boardId)
     if (data.columnId) updateData.columnId = ObjectId(data.columnId)
+
+    // Quan trọng: Lọc những field không được phép cập nhật:
+    Object.keys(updateData).forEach(key => {
+      if (!ALLOW_UPDATE_FIELDS.includes(key)) delete updateData[key]
+    })
 
     const result = await getDB().collection(cardCollectionName).findOneAndUpdate(
       { _id: ObjectId(id) },

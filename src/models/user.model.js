@@ -21,6 +21,8 @@ const userCollectionSchema = Joi.object({
   updatedAt: Joi.date().timestamp().default(null)
 })
 
+const ALLOW_UPDATE_FIELDS = ['password', 'displayName', 'avatar', 'isActive', 'verifyToken', 'updatedAt']
+
 const validateSchema = async (data) => {
   return await userCollectionSchema.validateAsync(data, { abortEarly: false })
 }
@@ -56,9 +58,31 @@ const createNew = async (data) => {
   }
 }
 
+const update = async (id, data) => {
+  try {
+    const updateData = { ...data }
+
+    // Quan trọng: Lọc những field không được phép cập nhật:
+    Object.keys(updateData).forEach(key => {
+      if (!ALLOW_UPDATE_FIELDS.includes(key)) delete updateData[key]
+    })
+
+    const result = await getDB().collection(userCollectionName).findOneAndUpdate(
+      { _id: ObjectId(id) },
+      { $set: updateData },
+      { returnDocument: 'after' }
+    )
+
+    return result.value
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const UserModel = {
   userCollectionName,
   createNew,
   findOneById,
-  findOneByAny
+  findOneByAny,
+  update
 }
