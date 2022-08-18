@@ -16,7 +16,7 @@ const createNew = async (data) => {
     }
 
     // Tạo data để lưu vào DB
-    // trungquandev@gmail.com
+    // thaituan7820@gmail.com
     const username = data.email.split('@')[0] || ''
     const user = {
       email: data.email,
@@ -82,22 +82,22 @@ const signIn = async (data) => {
       throw new Error('Your Account is not active.')
     }
 
-    //compare password
+    //Compare password
     if (!bcryptjs.compareSync(data.password, exitUser.password)) {
       throw new Error('Your Email or password is incorrect.')
     }
 
-    // xu ly JWT token
+    // Xử lý JWT tokens
     const accessToken = await JwtProvider.generateToken(
       env.ACCESS_TOKEN_SECRET_SIGNATURE,
       env.ACCESS_TOKEN_SECRET_LIFE,
-      {_id: exitUser._id, email: exitUser.email}
+      { _id: exitUser._id, email: exitUser.email }
     )
 
     const refreshToken = await JwtProvider.generateToken(
       env.REFRESH_TOKEN_SECRET_SIGNATURE,
       env.REFRESH_TOKEN_SECRET_LIFE,
-      {_id: exitUser._id, email: exitUser.email}
+      { _id: exitUser._id, email: exitUser.email }
     )
 
     const resUser = pick(exitUser, ['_id', 'email', 'username', 'displayName'])

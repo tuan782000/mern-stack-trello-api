@@ -5,6 +5,7 @@ export const HttpStatusCode = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   NOT_FOUND: 404,
+  EXPIRED: 410,
   INTERNAL_SERVER: 500
 }
 
