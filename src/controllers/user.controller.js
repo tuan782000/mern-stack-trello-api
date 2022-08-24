@@ -39,8 +39,22 @@ const signIn = async (req, res) => {
   }
 }
 
+const signOut = async (req, res) => {
+  try {
+    res.clearCookie('accessToken')
+    res.clearCookie('refreshToken')
+
+    res.status(HttpStatusCode.OK).json({ signedOut: true })
+  } catch (error) {
+    res.status(HttpStatusCode.INTERNAL_SERVER).json({
+      errors: error.message
+    })
+  }
+}
+
 export const UserController = {
   createNew,
   verifyAccount,
-  signIn
+  signIn,
+  signOut
 }

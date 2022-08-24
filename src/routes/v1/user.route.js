@@ -13,4 +13,7 @@ router.route('/verify')
 router.route('/sign_in')
   .post(UserValidation.signIn, UserController.signIn)
 
+router.route('/sign_out')
+  .delete(UserController.signOut)
+
 export const userRoutes = router

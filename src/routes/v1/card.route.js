@@ -1,13 +1,14 @@
 import express from 'express'
 import { CardController } from '*/controllers/card.controller'
 import { CardValidation } from '*/validations/card.validation'
+import { AuthMiddleWare } from '*/middlewares/auth.middleware'
 
 const router = express.Router()
 
 router.route('/')
-  .post(CardValidation.createNew, CardController.createNew)
+  .post(AuthMiddleWare.isAuthorized, CardValidation.createNew, CardController.createNew)
 
 router.route('/:id')
-  .put(CardValidation.update, CardController.update)
+  .put(AuthMiddleWare.isAuthorized, CardValidation.update, CardController.update)
 
 export const cardRoutes = router
