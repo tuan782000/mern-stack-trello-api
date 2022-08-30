@@ -16,4 +16,7 @@ router.route('/sign_in')
 router.route('/sign_out')
   .delete(UserController.signOut)
 
+router.route('/refresh_token')
+  .get(UserController.refreshToken)
+
 export const userRoutes = router

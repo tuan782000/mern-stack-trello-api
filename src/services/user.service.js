@@ -7,7 +7,6 @@ import { WEBSITE_DOMAIN } from '../utilities/constants'
 import { JwtProvider } from '../providers/jwtProvider'
 import { env } from '*/config/environtment'
 
-
 const createNew = async (data) => {
   try {
     const exitUser = await UserModel.findOneByAny('email', data.email)
@@ -91,12 +90,14 @@ const signIn = async (data) => {
     const accessToken = await JwtProvider.generateToken(
       env.ACCESS_TOKEN_SECRET_SIGNATURE,
       env.ACCESS_TOKEN_SECRET_LIFE,
+      // 10,
       { _id: exitUser._id, email: exitUser.email }
     )
 
     const refreshToken = await JwtProvider.generateToken(
       env.REFRESH_TOKEN_SECRET_SIGNATURE,
       env.REFRESH_TOKEN_SECRET_LIFE,
+      // 15,
       { _id: exitUser._id, email: exitUser.email }
     )
 
@@ -107,8 +108,29 @@ const signIn = async (data) => {
     throw new Error(error)
   }
 }
+
+const refreshToken = async (clientRefreshToken) => {
+  try {
+    const refreshTokenDecoded = await JwtProvider.verifyToken(env.REFRESH_TOKEN_SECRET_SIGNATURE, clientRefreshToken)
+
+    // Xử lý JWT tokens
+    // Chỗ này vì chúng ta chỉ lưu những thông tin unique và cố định của user, vì vậy có thể lấy luôn từ refreshTokenDecoded ra, không cần query vào DB để lấy data mới
+    const accessToken = await JwtProvider.generateToken(
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_SECRET_LIFE,
+      // 10,
+      { _id: refreshTokenDecoded._id, email: refreshTokenDecoded.email }
+    )
+
+    return { accessToken }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const UserService = {
   createNew,
   verifyAccount,
-  signIn
+  signIn,
+  refreshToken
 }

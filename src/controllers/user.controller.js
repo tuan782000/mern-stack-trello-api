@@ -52,9 +52,25 @@ const signOut = async (req, res) => {
   }
 }
 
+const refreshToken = async (req, res) => {
+  try {
+    const result = await UserService.refreshToken(req.cookies?.refreshToken)
+
+    //Xu ly cookiees
+    res.cookie('accessToken', result.accessToken, { httpOnly: true, secure: true, sameSite: 'none' })
+
+    res.status(HttpStatusCode.OK).json(result)
+  } catch (error) {
+    res.status(HttpStatusCode.INTERNAL_SERVER).json({
+      errors: 'Please Sign In!'
+    })
+  }
+}
+
 export const UserController = {
   createNew,
   verifyAccount,
   signIn,
-  signOut
+  signOut,
+  refreshToken
 }
