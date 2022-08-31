@@ -38,7 +38,7 @@ const createNew = async (data) => {
     `
     await SendInBlueProvider.sendEmail(getUser.email, subject, htmlContent)
 
-    return pick(getUser, ['_id', 'email', 'username', 'displayName'])
+    return pick(getUser, ['_id', 'email', 'username', 'displayName', 'avatar', 'isActive', 'role'])
   } catch (error) {
     throw new Error(error)
   }
@@ -101,7 +101,7 @@ const signIn = async (data) => {
       { _id: exitUser._id, email: exitUser.email }
     )
 
-    const resUser = pick(exitUser, ['_id', 'email', 'username', 'displayName'])
+    const resUser = pick(exitUser, ['_id', 'email', 'username', 'displayName', 'avatar', 'isActive', 'role'])
 
     return { accessToken, refreshToken, ...resUser }
   } catch (error) {
@@ -128,9 +128,39 @@ const refreshToken = async (clientRefreshToken) => {
   }
 }
 
+const update = async (userId, data) => {
+  try {
+    let updatedUser = {}
+
+    if (data.currentPassword && data.newPassword) {
+      // xử lý thay đổi mật khẩu
+      const exitUser = await UserModel.findOneByAny('_id', userId)
+      if (!exitUser) {
+        throw new Error('User not found.')
+      }
+      //Compare password
+      if (!bcryptjs.compareSync(data.currentPassword, exitUser.password)) {
+        throw new Error('Your current password is incorrect.')
+      }
+
+      updatedUser = await UserModel.update(userId, {
+        password: bcryptjs.hashSync(data.newPassword, 8)
+      })
+
+    } else {
+      // xử lý displayName hoặc các thông tin chung
+      updatedUser = await UserModel.update(userId, data)
+    }
+
+    return pick(updatedUser, ['_id', 'email', 'username', 'displayName', 'avatar', 'isActive', 'role'])
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 export const UserService = {
   createNew,
   verifyAccount,
   signIn,
-  refreshToken
+  refreshToken,
+  update
 }
