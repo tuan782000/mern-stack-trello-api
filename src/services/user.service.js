@@ -2,9 +2,10 @@ import { UserModel } from '*/models/user.model'
 import bcryptjs from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
 import { pick } from 'lodash'
-import { SendInBlueProvider } from '../providers/SendInBlueProvider'
-import { WEBSITE_DOMAIN } from '../utilities/constants'
-import { JwtProvider } from '../providers/jwtProvider'
+import { SendInBlueProvider } from '*/providers/SendInBlueProvider'
+import { WEBSITE_DOMAIN } from '*/utilities/constants'
+import { JwtProvider } from '*/providers/jwtProvider'
+import { CloudinaryProvider } from '*/providers/CloudinaryProvider'
 import { env } from '*/config/environtment'
 
 const createNew = async (data) => {
@@ -128,11 +129,16 @@ const refreshToken = async (clientRefreshToken) => {
   }
 }
 
-const update = async (userId, data) => {
+const update = async (userId, data, reqFile) => {
   try {
     let updatedUser = {}
 
-    if (data.currentPassword && data.newPassword) {
+    if (reqFile) {
+      const uploadResult = await CloudinaryProvider.streamUpload(reqFile.buffer, 'avatars')
+
+      updatedUser = await UserModel.update(userId, { avatar: uploadResult.secure_url })
+
+    } else if (data.currentPassword && data.newPassword) {
       // xử lý thay đổi mật khẩu
       const exitUser = await UserModel.findOneByAny('_id', userId)
       if (!exitUser) {
