@@ -8,6 +8,11 @@ import { CardModel } from './card.model'
 const boardCollectionName = 'boards'
 const boardCollectionSchema = Joi.object({
   title: Joi.string().required().min(3).max(20).trim(),
+
+  description: Joi.string().required().min(3).max(256).trim(),
+  ownerIds: Joi.array().items(Joi.string()).default([]),
+  memberIds: Joi.array().items(Joi.string()).default([]),
+
   columnOrder: Joi.array().items(Joi.string()).default([]),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp().default(null),
@@ -104,11 +109,31 @@ const getFullBoard = async (boardId) => {
     throw new Error(error)
   }
 }
+const getListBoards = async (userId) => {
+  try {
+    let queryConditions = [
+      { $or: [
+        { ownerIds: { $all: [ObjectId(userId)] } },
+        { memberIds: { $all: [ObjectId(userId)] } }
+      ] },
+      { _destroy: false }
+    ]
+
+    const results = await getDB().collection(boardCollectionName).aggregate([
+      { $match: { $and: queryConditions } }
+    ]).toArray()
+
+    return results || []
+  } catch (error) {
+    throw new Error(error)
+  }
+}
 
 export const BoardModel = {
   createNew,
   update,
   pushColumnOrder,
   getFullBoard,
-  findOneById
+  findOneById,
+  getListBoards
 }

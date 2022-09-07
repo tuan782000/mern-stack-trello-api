@@ -37,8 +37,22 @@ const update = async (req, res) => {
   }
 }
 
+const getListBoards = async (req, res) => {
+  try {
+    const userId = req.jwtDecoded._id
+    const result = await BoardService.getListBoards(userId)
+
+    res.status(HttpStatusCode.OK).json(result)
+  } catch (error) {
+    res.status(HttpStatusCode.INTERNAL_SERVER).json({
+      errors: error.message
+    })
+  }
+}
+
 export const BoardController = {
   createNew,
   getFullBoard,
-  update
+  update,
+  getListBoards
 }

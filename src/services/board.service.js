@@ -57,8 +57,19 @@ const update = async (id, data) => {
   }
 }
 
+const getListBoards = async (userId) => {
+  try {
+    const boards = await BoardModel.getListBoards(userId)
+
+    return boards
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const BoardService = {
   createNew,
   update,
-  getFullBoard
+  getFullBoard,
+  getListBoards
 }
