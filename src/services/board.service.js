@@ -1,5 +1,6 @@
 import { BoardModel } from '*/models/board.model'
 import { cloneDeep } from 'lodash'
+import { DEFAULT_CURRENT_PAGE, DEFAULT_ITEMS_PER_PAGE } from '*/utilities/constants'
 
 const createNew = async (data) => {
   try {
@@ -57,9 +58,9 @@ const update = async (id, data) => {
   }
 }
 
-const getListBoards = async (userId) => {
+const getListBoards = async (userId, currentPage = DEFAULT_CURRENT_PAGE, itemsPerPage = DEFAULT_ITEMS_PER_PAGE, queryFilters) => {
   try {
-    const boards = await BoardModel.getListBoards(userId)
+    const boards = await BoardModel.getListBoards(userId, parseInt(currentPage), parseInt(itemsPerPage), queryFilters)
 
     return boards
   } catch (error) {

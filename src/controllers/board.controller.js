@@ -39,8 +39,11 @@ const update = async (req, res) => {
 
 const getListBoards = async (req, res) => {
   try {
+    const { currentPage, itemsPerPage, q } = req.query
+    const queryFilters = q
+
     const userId = req.jwtDecoded._id
-    const result = await BoardService.getListBoards(userId)
+    const result = await BoardService.getListBoards(userId, currentPage, itemsPerPage, queryFilters)
 
     res.status(HttpStatusCode.OK).json(result)
   } catch (error) {

@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import { getDB } from '*/config/mongodb'
 import { ColumnModel } from './column.model'
 import { CardModel } from './card.model'
+import { pagingSkipValue } from '*/utilities/algorithm'
 
 // Define Board collection
 const boardCollectionName = 'boards'
@@ -109,7 +110,7 @@ const getFullBoard = async (boardId) => {
     throw new Error(error)
   }
 }
-const getListBoards = async (userId) => {
+const getListBoards = async (userId, currentPage, itemsPerPage, queryFilters) => {
   try {
     let queryConditions = [
       { $or: [
@@ -119,11 +120,33 @@ const getListBoards = async (userId) => {
       { _destroy: false }
     ]
 
-    const results = await getDB().collection(boardCollectionName).aggregate([
-      { $match: { $and: queryConditions } }
+    if (queryFilters) {
+      Object.keys(queryFilters).forEach(key => {
+        //queryConditions.push({ [key]: { $regex: queryFilters[key] } }) // có phân biệt chữ hoa thường
+        queryConditions.push({ [key]: { $regex: new RegExp(queryFilters[key], 'i') } }) // không phân biệt hoa thường
+      })
+    }
+
+    const query = await getDB().collection(boardCollectionName).aggregate([
+      { $match: { $and: queryConditions } },
+      { $facet: {
+        'data': [
+          { $skip: pagingSkipValue(currentPage, itemsPerPage) },
+          { $limit: itemsPerPage },
+          { $sort: { title: 1 } }
+        ],
+        'totalData': [
+          { $count: 'count' }
+        ]
+      } }
     ]).toArray()
 
-    return results || []
+    const res = query[0]
+
+    return {
+      results: res.data || [],
+      totalResults: res.totalData[0]?.count || 0
+    }
   } catch (error) {
     throw new Error(error)
   }

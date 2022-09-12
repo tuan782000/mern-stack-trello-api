@@ -21,3 +21,6 @@ let websiteDomain = 'http://localhost:3000'
 if (env.BUILD_MODE === 'production') websiteDomain = 'https://trungquandev.com'
 // if (env.BUILD_MODE === 'dev') websiteDomain = 'http://localhost:3000'
 export const WEBSITE_DOMAIN = websiteDomain
+
+export const DEFAULT_ITEMS_PER_PAGE = 12
+export const DEFAULT_CURRENT_PAGE = 1
