@@ -3,7 +3,9 @@ import { BoardService } from '*/services/board.service'
 
 const createNew = async (req, res) => {
   try {
-    const result = await BoardService.createNew(req.body)
+    const userId = req.jwtDecoded._id
+    const result = await BoardService.createNew(req.body, userId)
+
     res.status(HttpStatusCode.OK).json(result)
   } catch (error) {
     res.status(HttpStatusCode.INTERNAL_SERVER).json({
@@ -15,7 +17,9 @@ const createNew = async (req, res) => {
 const getFullBoard = async (req, res) => {
   try {
     const { id } = req.params
-    const result = await BoardService.getFullBoard(id)
+    const userId = req.jwtDecoded._id
+
+    const result = await BoardService.getFullBoard(id, userId)
     res.status(HttpStatusCode.OK).json(result)
   } catch (error) {
     res.status(HttpStatusCode.INTERNAL_SERVER).json({

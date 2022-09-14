@@ -8,7 +8,7 @@ import { pagingSkipValue } from '*/utilities/algorithm'
 // Define Board collection
 const boardCollectionName = 'boards'
 const boardCollectionSchema = Joi.object({
-  title: Joi.string().required().min(3).max(20).trim(),
+  title: Joi.string().required().min(3).max(50).trim(),
 
   description: Joi.string().required().min(3).max(256).trim(),
   ownerIds: Joi.array().items(Joi.string()).default([]),
@@ -35,10 +35,14 @@ const findOneById = async (id) => {
   }
 }
 
-const createNew = async (data) => {
+const createNew = async (data, userId) => {
   try {
     const value = await validateSchema(data)
-    const result = await getDB().collection(boardCollectionName).insertOne(value)
+    const createData = {
+      ...value,
+      ownerIds: [ObjectId(userId)]
+    }
+    const result = await getDB().collection(boardCollectionName).insertOne(createData)
     return result
   } catch (error) {
     throw new Error(error)
