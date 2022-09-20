@@ -14,14 +14,15 @@ const createNew = async (data) => {
   }
 }
 
-const update = async (id, data) => {
+const update = async (cardId, data, user) => {
   try {
     const updateData = {
       ...data,
       updatedAt: Date.now()
     }
-    if (updateData._id) delete updateData._id
-    const updatedCard = await CardModel.update(id, updateData)
+    console.log(user)
+
+    const updatedCard = await CardModel.update(cardId, updateData)
 
     return updatedCard
   } catch (error) {

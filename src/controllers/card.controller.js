@@ -15,7 +15,8 @@ const createNew = async (req, res) => {
 const update = async (req, res) => {
   try {
     const { id } = req.params
-    const result = await CardService.update(id, req.body)
+    const user = req.jwtDecoded
+    const result = await CardService.update(id, req.body, user)
 
     res.status(HttpStatusCode.OK).json(result)
   } catch (error) {

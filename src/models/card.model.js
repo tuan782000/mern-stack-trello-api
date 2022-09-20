@@ -9,6 +9,18 @@ const cardCollectionSchema = Joi.object({
   columnId: Joi.string().required(), // also ObjectId when create new
   title: Joi.string().required().min(3).max(30).trim(),
   cover: Joi.string().default(null),
+
+  description: Joi.string().optional(),
+  memberIds: Joi.array().items(Joi.string()).default([]),
+  comments: Joi.array().items({
+    userId: Joi.string(),
+    userEmail: Joi.string(),
+    userAvatar: Joi.string(),
+    userDisplayName: Joi.string(),
+    content: Joi.string(),
+    createdAt: Joi.date().timestamp() // vì chỗ này sau sẽ dùng hàm $push nên nó không ăn giá trị default giống hàm insertOne được
+  }).default([]),
+
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
   updatedAt: Joi.date().timestamp().default(null),
   _destroy: Joi.boolean().default(false)
