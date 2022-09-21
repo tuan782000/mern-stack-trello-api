@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import { getDB } from '*/config/mongodb'
 import { ColumnModel } from './column.model'
 import { CardModel } from './card.model'
+import { UserModel } from './user.model'
 import { pagingSkipValue } from '*/utilities/algorithm'
 
 // Define Board collection
@@ -106,6 +107,24 @@ const getFullBoard = async (boardId) => {
         localField: '_id',
         foreignField: 'boardId',
         as: 'cards'
+      } },
+      { $lookup: {
+        from: UserModel.userCollectionName,
+        localField: 'ownerIds',
+        foreignField: '_id',
+        as: 'owners',
+        pipeline: [
+          { $project: { 'password': 0, 'verifyToken': 0 } }
+        ]
+      } },
+      { $lookup: {
+        from: UserModel.userCollectionName,
+        localField: 'memberIds',
+        foreignField: '_id',
+        as: 'members',
+        pipeline: [
+          { $project: { 'password': 0, 'verifyToken': 0 } }
+        ]
       } }
     ]).toArray()
 

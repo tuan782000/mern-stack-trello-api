@@ -96,10 +96,25 @@ const deleteMany = async (ids) => {
   }
 }
 
+const pushNewComment = async (cardId, comment) => {
+  try {
+    const result = await getDB().collection(cardCollectionName).findOneAndUpdate(
+      { _id: ObjectId(cardId) },
+      { $push: { comments: comment } },
+      { returnDocument: 'after' }
+    )
+
+    return result.value
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const CardModel = {
   cardCollectionName,
   createNew,
   deleteMany,
   update,
-  findOneById
+  findOneById,
+  pushNewComment
 }
