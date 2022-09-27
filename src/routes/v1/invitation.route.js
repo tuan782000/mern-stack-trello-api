@@ -9,4 +9,8 @@ const router = express.Router()
 router.route('/board')
   .post(AuthMiddleWare.isAuthorized, InvitationValidation.createNewBoardInvitation, InvitationController.createNewBoardInvitation)
 
+//get invitations by user
+router.route('/')
+  .get(AuthMiddleWare.isAuthorized, InvitationController.getInvitations)
+
 export const invitationRoutes = router
