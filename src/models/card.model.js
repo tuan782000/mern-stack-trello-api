@@ -1,6 +1,10 @@
 import Joi from 'joi'
 import { ObjectId } from 'mongodb'
 import { getDB } from '*/config/mongodb'
+import {
+  CARD_MEMBERS_ACTION_PUSH,
+  CARD_MEMBERS_ACTION_REMOVE
+} from '*/utilities/constants'
 
 // Define Card collection
 const cardCollectionName = 'cards'
@@ -110,11 +114,35 @@ const pushNewComment = async (cardId, comment) => {
   }
 }
 
+const updateMembers = async (cardId, incomingMember) => {
+  try {
+    let updateCondition = {}
+    if (incomingMember.action === CARD_MEMBERS_ACTION_PUSH) {
+      updateCondition = { $push: { memberIds: ObjectId(incomingMember.userId) } }
+    }
+    if (incomingMember.action === CARD_MEMBERS_ACTION_REMOVE) {
+      updateCondition = { $pull: { memberIds: ObjectId(incomingMember.userId) } }
+    }
+
+    const result = await getDB().collection(cardCollectionName).findOneAndUpdate(
+      { _id: ObjectId(cardId) },
+      updateCondition,
+      { returnDocument: 'after' }
+    )
+
+    return result.value
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+
 export const CardModel = {
   cardCollectionName,
   createNew,
   deleteMany,
   update,
   findOneById,
-  pushNewComment
+  pushNewComment,
+  updateMembers
 }
