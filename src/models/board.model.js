@@ -159,7 +159,7 @@ const getListBoards = async (userId, currentPage, itemsPerPage, queryFilters) =>
 
     if (queryFilters) {
       Object.keys(queryFilters).forEach(key => {
-        //queryConditions.push({ [key]: { $regex: queryFilters[key] } }) // có phân biệt chữ hoa thường
+        // queryConditions.push({ [key]: { $regex: queryFilters[key] } }) // có phân biệt chữ hoa thường
         queryConditions.push({ [key]: { $regex: new RegExp(queryFilters[key], 'i') } }) // không phân biệt hoa thường
       })
     }

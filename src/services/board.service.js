@@ -35,7 +35,7 @@ const getFullBoard = async (boardId, userId) => {
       throw new Error('You have no right to access this board!')
     }
 
-    // Filter deteled columns
+    // Filter deleted columns
     transformBoard.columns = transformBoard.columns.filter(column => !column._destroy)
 
     // Add card to each column

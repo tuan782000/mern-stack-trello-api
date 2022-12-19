@@ -28,6 +28,6 @@ const isAuthorized = async (req, res, next) => {
   }
 }
 
-export const AuthMiddleWare = {
+export const AuthMiddleware = {
   isAuthorized
 }

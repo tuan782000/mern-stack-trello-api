@@ -56,6 +56,6 @@ const bootServer = () => {
 
   // Support heroku deploy
   server.listen(process.env.PORT || env.APP_PORT, () => {
-    console.log(`Hello trungquandev, I'm running at port: ${process.env.PORT || env.APP_PORT}/`)
+    console.log(`Hello World, I'm running at port: ${process.env.PORT || env.APP_PORT}/`)
   })
 }

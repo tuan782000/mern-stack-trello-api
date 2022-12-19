@@ -136,6 +136,24 @@ const updateMembers = async (cardId, incomingMember) => {
   }
 }
 
+// Updating Arrays https://www.mongodb.com/docs/manual/reference/method/db.collection.updateMany/
+const updateManyComments = async (userInfo) => {
+  try {
+    const result = await getDB().collection(cardCollectionName).updateMany(
+      { 'comments.userId': ObjectId(userInfo._id) },
+      { $set: {
+        'comments.$[element].userAvatar': userInfo.avatar,
+        'comments.$[element].userDisplayName': userInfo.displayName
+      } },
+      { arrayFilters: [ { 'element.userId': ObjectId(userInfo._id) } ] }
+    )
+    // console.log(result)
+    return result
+  } catch (error) {
+    // console.log(error)
+    throw new Error(error)
+  }
+}
 
 export const CardModel = {
   cardCollectionName,
@@ -144,5 +162,6 @@ export const CardModel = {
   update,
   findOneById,
   pushNewComment,
-  updateMembers
+  updateMembers,
+  updateManyComments
 }

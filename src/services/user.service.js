@@ -8,6 +8,9 @@ import { JwtProvider } from '*/providers/jwtProvider'
 import { CloudinaryProvider } from '*/providers/CloudinaryProvider'
 import { env } from '*/config/environtment'
 
+import { RedisQueueProvider } from '*/providers/RedisQueueProvider'
+import { CardModel } from '*/models/card.model'
+
 const createNew = async (data) => {
   try {
     const exitUser = await UserModel.findOneByAny('email', data.email)
@@ -132,11 +135,14 @@ const refreshToken = async (clientRefreshToken) => {
 const update = async (userId, data, reqFile) => {
   try {
     let updatedUser = {}
+    let shouldUpdateCardsComments = false
 
     if (reqFile) {
       const uploadResult = await CloudinaryProvider.streamUpload(reqFile.buffer, 'avatars')
 
       updatedUser = await UserModel.update(userId, { avatar: uploadResult.secure_url })
+
+      shouldUpdateCardsComments = true
 
     } else if (data.currentPassword && data.newPassword) {
       // xử lý thay đổi mật khẩu
@@ -156,6 +162,47 @@ const update = async (userId, data, reqFile) => {
     } else {
       // xử lý displayName hoặc các thông tin chung
       updatedUser = await UserModel.update(userId, data)
+      if (data.displayName) {
+        shouldUpdateCardsComments = true
+      }
+    }
+
+    // xử lý cập nhật nhiều comments trong nhiều card
+    if (shouldUpdateCardsComments) {
+      // B1: Khởi tạo một hàng đợi để cập nhật toàn bộ comments của nhiều cards
+      const updateCardsCommentsQueue = RedisQueueProvider.generateQueue('updateCardsCommentsQueue')
+      // B2: Khởi tạo những việc cần làm trong tiến trình hàng đợi - proccess queue
+      updateCardsCommentsQueue.process(async (job, done) => {
+        console.log('Bắt đầu chạy một hoặc nhiều công việc - Job(s)...')
+        try {
+          const cardCommentUpdated = await CardModel.updateManyComments(job.data)
+          done(null, cardCommentUpdated)
+        } catch (error) {
+          done(new Error('Error from updateCardsCommentsQueue', error))
+        }
+
+        // setTimeout(async () => {
+        //   try {
+        //     const cardCommentUpdated = await CardModel.updateManyComments(job.data)
+        //     done(null, cardCommentUpdated)
+        //   } catch (error) {
+        //     done(new Error('Error from updateCardsCommentsQueue', error))
+        //   }
+        // }, 7000)
+
+      })
+
+      // B3: Check completed hoặc failed, tùy trường hợp yêu cầu mà cần cái event này, để bắn thông báo khi job chạy xong chẳng hạn
+      // Nhiều event khác: https://github.com/OptimalBits/bull/blob/HEAD/REFERENCE.md#events
+      updateCardsCommentsQueue.on('completed', (job, result) => {
+        console.log(`Job with id: ${job.id} and name: ${job.queue.name} completed with result:`, result)
+      })
+      updateCardsCommentsQueue.on('failed', (job, error) => {
+        console.log(`Job with id: ${job.id} and name: ${job.queue.name} failed with error:`, error)
+      })
+
+      // B4: Bước quan trọng cuối cùng: Thêm vào hàng đợi để redis xử lý
+      updateCardsCommentsQueue.add(updatedUser)
     }
 
     return pick(updatedUser, ['_id', 'email', 'username', 'displayName', 'avatar', 'isActive', 'role'])
